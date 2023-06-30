@@ -19,8 +19,6 @@ class ReservationList extends StatefulWidget {
 }
 
 class _ReservationListState extends State<ReservationList> {
-  late Future<List<Reservation>> _reservationsFuture;
-
   @override
   void initState() {
     super.initState();

@@ -25,7 +25,7 @@ class _AddReserveState extends State<AddReserve> {
         id: "0",
         nombre: _nombre,
         domo: _domo,
-        fecha: DateTime.now().toString(),
+        fecha: DateTime.now().toString().substring(0, 10),
         abono: _abono.toString(),
         estado: "ACTIVO");
 
@@ -54,8 +54,8 @@ class _AddReserveState extends State<AddReserve> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _nombre = value!;
+                onChanged: (value) {
+                  _nombre = value;
                 },
               ),
             ),
@@ -121,8 +121,8 @@ class _AddReserveState extends State<AddReserve> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _abono = int.parse(value!);
+                onChanged: (value) {
+                  _abono = int.parse(value);
                 },
               ),
             ),

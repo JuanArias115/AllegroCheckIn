@@ -12,8 +12,7 @@ class RestService {
     print(json.encode(obj));
     try {
       final response = await http
-          .post(Uri.parse('${_url + method}'),
-              body: json.encode(obj), encoding: Encoding.getByName("utf-8"))
+          .post(Uri.parse('${_url + method}'), body: obj)
           .timeout(const Duration(seconds: 80), onTimeout: () {
         return http.Response("TimeOut", 800);
       }).catchError((error) {

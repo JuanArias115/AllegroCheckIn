@@ -1,10 +1,14 @@
 import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
+import 'package:allegrocheckin/models/ProductsEstadia.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/products.dart';
 import 'package:flutter/material.dart';
 
 class ProductListaAdd extends StatefulWidget {
+  final String idEstadia;
+
+  const ProductListaAdd({super.key, required this.idEstadia});
   @override
   _ProductListaAddState createState() => _ProductListaAddState();
 }
@@ -40,8 +44,12 @@ class _ProductListaAddState extends State<ProductListaAdd> {
                 return ProductCard(
                   product: product,
                   onAdd: () async {
-                    var result =
-                        await ReserveService().addProductsEstadia(product);
+                    var result = await ReserveService().addProductsEstadia(
+                        ProductoEstadia(
+                            id: "0",
+                            idEstadia: widget.idEstadia.toString(),
+                            item: product.item,
+                            valor: product.valor));
                     Navigator.of(context).pop(result);
                   },
                 );

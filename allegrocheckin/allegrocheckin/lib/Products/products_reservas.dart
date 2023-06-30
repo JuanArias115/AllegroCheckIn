@@ -15,9 +15,47 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
+  List<ProductoEstadia> _products = [];
+  double _total = 0.0;
+
   @override
   void initState() {
     super.initState();
+    _fetchProductList();
+  }
+
+  Future<void> _fetchProductList() async {
+    try {
+      CommandResult result =
+          await ReserveService().getproductsEstadias(widget.id);
+      List<ProductoEstadia> products =
+          ProductoEstadia.parseMyDataList(result.data);
+      setState(() {
+        _products = products;
+        _calculateTotal();
+      });
+    } catch (error) {
+      // Manejar el error de manera adecuada
+    }
+  }
+
+  void _calculateTotal() {
+    double total = 0.0;
+    for (var product in _products) {
+      total += double.parse(product.valor);
+    }
+    setState(() {
+      _total = total;
+    });
+  }
+
+  Future<void> _deleteProduct(String productId) async {
+    try {
+      await ReserveService().deleteProductsEstadias(productId);
+      _fetchProductList();
+    } catch (error) {
+      // Manejar el error de manera adecuada
+    }
   }
 
   @override
@@ -44,68 +82,62 @@ class _ProductListState extends State<ProductList> {
                 onPressed: () async {
                   var r = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProductListaAdd()),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ProductListaAdd(idEstadia: widget.id),
+                    ),
                   );
-                  setState(() {
-                    var i = 1;
-                  });
+                  _fetchProductList();
                 },
                 child: const Icon(Icons.add),
               ),
             ],
           ),
         ),
-        appBar: AppBarComponents(),
+        appBar: AppBar(
+          title: Text('Total: \$ ${_total.toStringAsFixed(0)}'),
+        ),
         body: Container(
-          child: FutureBuilder<CommandResult>(
-            future: ReserveService().getproductsEstadias(widget.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error al cargar los datos'),
-                );
-              } else if (snapshot.hasData) {
-                List<ProductoEstadia> products =
-                    ProductoEstadia.parseMyDataList(snapshot.data!.data);
-                return ListView.builder(
-                  itemCount: products.length,
+          child: _products.isNotEmpty
+              ? ListView.builder(
+                  itemCount: _products.length,
                   itemBuilder: (context, index) {
-                    ProductoEstadia product = products[index];
+                    ProductoEstadia product = _products[index];
+                    TextEditingController controller =
+                        TextEditingController(text: product.valor.toString());
+
                     return Card(
                       margin:
                           EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: ListTile(
-                          leading: Icon(Icons.shopping_cart),
-                          title: Text(product.item),
-                          subtitle: Text('Valor: \$${product.valor}'),
-                          trailing: IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                            onPressed: () async {
-                              var r = await ReserveService()
-                                  .deleteProductsEstadias(product.id);
-                              setState(() {
-                                var i = 1;
-                              });
-                            },
-                          )),
+                        leading: Icon(Icons.shopping_cart),
+                        title: Text(product.item),
+                        subtitle: TextFormField(
+                          controller: controller,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            // Actualizar el valor del producto
+                            _products[index].valor =
+                                double.parse(value).toStringAsFixed(0);
+                            _calculateTotal();
+                          },
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            _deleteProduct(product.id);
+                          },
+                        ),
+                      ),
                     );
-                    ;
                   },
-                );
-              } else {
-                return Center(
-                  child: Text('No hay datos disponibles'),
-                );
-              }
-            },
-          ),
+                )
+              : Center(
+                  child: Text('No hay productos agregados'),
+                ),
         ),
       ),
     );
