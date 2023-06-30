@@ -1,109 +1,65 @@
+import 'package:allegrocheckin/Service/ReserveService.dart';
+import 'package:allegrocheckin/components/AppBarComponent.dart';
+import 'package:allegrocheckin/models/commandresult_model.dart';
+import 'package:allegrocheckin/models/products.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class Product {
-  final String name;
-  final double value;
-
-  Product({required this.name, required this.value});
-}
-
-class ProductService {
-  Future<List<Product>> fetchProducts() async {
-    // Simulación de un retardo en la respuesta del servicio
-    await Future.delayed(Duration(seconds: 2));
-
-    // Datos de ejemplo
-    List<Product> products = [
-      Product(name: 'Producto 1', value: 10.99),
-      Product(name: 'Producto 2', value: 15.99),
-      Product(name: 'Producto 3', value: 19.99),
-    ];
-
-    return products;
-  }
-}
-
-class MyApp extends StatelessWidget {
+class ProductListaAdd extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Productos',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Lista de Productos'),
-        ),
-        body: ProductList(),
-      ),
-    );
-  }
+  _ProductListaAddState createState() => _ProductListaAddState();
 }
 
-class ProductList extends StatefulWidget {
-  @override
-  _ProductListState createState() => _ProductListState();
-}
-
-class _ProductListState extends State<ProductList> {
-  final ProductService _productService = ProductService();
-  late Future<List<Product>> _productsFuture;
-
+class _ProductListaAddState extends State<ProductListaAdd> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = _productService.fetchProducts();
-  }
-
-  void _addProduct(Product product) {
-    // Aquí puedes realizar alguna acción con el producto agregado, como enviarlo a un servicio o almacenarlo en alguna lista
-    print('Producto agregado: ${product.name}, Valor: ${product.value}');
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Product>>(
-      future: _productsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Error al cargar los datos'),
-          );
-        } else if (snapshot.hasData) {
-          List<Product> products = snapshot.data!;
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              Product product = products[index];
-              return ProductCard(
-                product: product,
-                onAdd: () {
-                  _addProduct(product);
-                },
-              );
-            },
-          );
-        } else {
-          return Center(
-            child: Text('No hay datos disponibles'),
-          );
-        }
-      },
+    return Scaffold(
+      appBar: AppBarComponents(),
+      body: FutureBuilder<CommandResult>(
+        future: ReserveService().getproducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error al cargar los datos'),
+            );
+          } else if (snapshot.hasData) {
+            List<Producto> products =
+                Producto.parseMyDataList(snapshot.data!.data);
+            return ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                Producto product = products[index];
+                return ProductCard(
+                  product: product,
+                  onAdd: () async {
+                    var result =
+                        await ReserveService().addProductsEstadia(product);
+                    Navigator.of(context).pop(result);
+                  },
+                );
+              },
+            );
+          } else {
+            return Center(
+              child: Text('No hay datos disponibles'),
+            );
+          }
+        },
+      ),
     );
   }
 }
 
 class ProductCard extends StatelessWidget {
-  final Product product;
+  final Producto product;
   final VoidCallback onAdd;
 
   const ProductCard({
@@ -118,8 +74,8 @@ class ProductCard extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: ListTile(
         leading: Icon(Icons.shopping_cart),
-        title: Text(product.name),
-        subtitle: Text('Valor: \$${product.value.toStringAsFixed(2)}'),
+        title: Text(product.item),
+        subtitle: Text('Valor: \$${product.valor}'),
         trailing: IconButton(
           icon: Icon(Icons.add),
           onPressed: onAdd,

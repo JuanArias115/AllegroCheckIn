@@ -32,8 +32,8 @@ class _MainPageState extends State<MainPage> {
         onTap: _onTabTapped,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Widget 1',
+            icon: Icon(Icons.bed),
+            label: 'Reservas ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
@@ -49,20 +49,11 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class Widget1 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Widget 1'),
-    );
-  }
-}
-
 class Widget2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Widget 2'),
+      child: Text('Proximamenta'),
     );
   }
 }
@@ -71,7 +62,7 @@ class Widget3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Widget 3'),
+      child: Text('Proximamenta'),
     );
   }
 }

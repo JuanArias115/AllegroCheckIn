@@ -1,5 +1,8 @@
 import 'package:allegrocheckin/Products/products_reservas.dart';
 import 'package:allegrocheckin/Reservas/add_reserva.dart';
+import 'package:allegrocheckin/Service/ReserveService.dart';
+import 'package:allegrocheckin/models/commandresult_model.dart';
+import 'package:allegrocheckin/models/estadias.dart';
 import 'package:flutter/material.dart';
 
 class Reservation {
@@ -10,60 +13,36 @@ class Reservation {
   Reservation({required this.name, required this.date, required this.domo});
 }
 
-class ReservationService {
-  Future<List<Reservation>> fetchReservations() async {
-    // Simulación de un retardo en la respuesta del servicio
-    await Future.delayed(Duration(seconds: 2));
-
-    // Datos de ejemplo
-    List<Reservation> reservations = [
-      Reservation(
-          name: 'John Doe',
-          date: DateTime.now().toString().substring(0, 10),
-          domo: 'Domo 1'),
-      Reservation(
-          name: 'Jane Smith',
-          date: DateTime.now().toString().substring(0, 10),
-          domo: 'Domo 2'),
-      Reservation(
-          name: 'Alice Johnson',
-          date: DateTime.now().toString().substring(0, 10),
-          domo: 'Domo 3'),
-    ];
-
-    return reservations;
-  }
-}
-
 class ReservationList extends StatefulWidget {
   @override
   _ReservationListState createState() => _ReservationListState();
 }
 
 class _ReservationListState extends State<ReservationList> {
-  final ReservationService _reservationService = ReservationService();
   late Future<List<Reservation>> _reservationsFuture;
 
   @override
   void initState() {
     super.initState();
-    _reservationsFuture = _reservationService.fetchReservations();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          var r = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddReserve()),
           );
+          setState(() {
+            var i = 1;
+          });
         },
         child: const Icon(Icons.add),
       ),
-      body: FutureBuilder<List<Reservation>>(
-        future: _reservationsFuture,
+      body: FutureBuilder<CommandResult>(
+        future: ReserveService().getEstadias(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -74,25 +53,49 @@ class _ReservationListState extends State<ReservationList> {
               child: Text('Error al cargar los datos'),
             );
           } else if (snapshot.hasData) {
-            List<Reservation> reservations = snapshot.data!;
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProductList()),
+            List<Estadia> reservations =
+                Estadia.parseMyDataList(snapshot.data!.data);
+            return ListView.builder(
+              itemCount: reservations.length,
+              itemBuilder: (context, index) {
+                Estadia reservation = reservations[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProductList(
+                                  id: reservation.id,
+                                )),
+                      );
+                    },
+                    child: ListTile(
+                        leading: const Icon(Icons.bed),
+                        title: Text(reservation.nombre),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Fecha: ${reservation.fecha.toString()}'),
+                            Text('Domo: ${reservation.domo}'),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            var res = await ReserveService()
+                                .deleteEstadias(reservation.id);
+                            setState(() {
+                              var i = 1;
+                            });
+                          },
+                        )),
+                  ),
                 );
+                ;
               },
-              child: ListView.builder(
-                itemCount: reservations.length,
-                itemBuilder: (context, index) {
-                  Reservation reservation = reservations[index];
-                  return ReservationCard(
-                    name: reservation.name,
-                    date: reservation.date,
-                    domo: reservation.domo,
-                  );
-                },
-              ),
             );
           } else {
             return const Center(
@@ -100,37 +103,6 @@ class _ReservationListState extends State<ReservationList> {
             );
           }
         },
-      ),
-    );
-  }
-}
-
-class ReservationCard extends StatelessWidget {
-  final String name;
-  final String date;
-  final String domo;
-
-  const ReservationCard({
-    Key? key,
-    required this.name,
-    required this.date,
-    required this.domo,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: ListTile(
-        leading: const Icon(Icons.bed),
-        title: Text(name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Fecha: ${date.toString()}'),
-            Text('Domo: $domo'),
-          ],
-        ),
       ),
     );
   }

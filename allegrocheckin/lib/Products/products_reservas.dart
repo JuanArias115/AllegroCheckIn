@@ -34,6 +34,8 @@ class _ProductListState extends State<ProductList> {
   final ProductService _productService = ProductService();
   late Future<List<Product>> _productsFuture;
 
+  TextEditingController _controller = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -47,9 +49,10 @@ class _ProductListState extends State<ProductList> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProductList()),
+            MaterialPageRoute(builder: (context) => ProductListAdd()),
           );
         },
+        child: const Icon(Icons.add),
       ),
       appBar: AppBarComponents(),
       body: FutureBuilder<List<Product>>(
@@ -99,11 +102,26 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: ListTile(
         leading: Icon(Icons.shopping_cart),
-        title: Text(name),
-        subtitle: Text('Valor: \$${value.toStringAsFixed(2)}'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(name),
+            SizedBox(
+              width: 150,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  controller: TextEditingController(text: value.toString()),
+                  decoration: InputDecoration(
+                    labelText: 'Precio',
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

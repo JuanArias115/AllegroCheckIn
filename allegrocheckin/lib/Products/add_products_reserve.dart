@@ -1,8 +1,5 @@
+import 'package:allegrocheckin/components/AppBarComponent.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
 
 class Product {
   final String name;
@@ -27,30 +24,12 @@ class ProductService {
   }
 }
 
-class MyApp extends StatelessWidget {
+class ProductListAdd extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Productos',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Lista de Productos'),
-        ),
-        body: ProductList(),
-      ),
-    );
-  }
+  _ProductListAddState createState() => _ProductListAddState();
 }
 
-class ProductList extends StatefulWidget {
-  @override
-  _ProductListState createState() => _ProductListState();
-}
-
-class _ProductListState extends State<ProductList> {
+class _ProductListAddState extends State<ProductListAdd> {
   final ProductService _productService = ProductService();
   late Future<List<Product>> _productsFuture;
 
@@ -67,37 +46,40 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Product>>(
-      future: _productsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Error al cargar los datos'),
-          );
-        } else if (snapshot.hasData) {
-          List<Product> products = snapshot.data!;
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              Product product = products[index];
-              return ProductCard(
-                product: product,
-                onAdd: () {
-                  _addProduct(product);
-                },
-              );
-            },
-          );
-        } else {
-          return Center(
-            child: Text('No hay datos disponibles'),
-          );
-        }
-      },
+    return Scaffold(
+      appBar: AppBarComponents(),
+      body: FutureBuilder<List<Product>>(
+        future: _productsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error al cargar los datos'),
+            );
+          } else if (snapshot.hasData) {
+            List<Product> products = snapshot.data!;
+            return ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                Product product = products[index];
+                return ProductCard(
+                  product: product,
+                  onAdd: () {
+                    _addProduct(product);
+                  },
+                );
+              },
+            );
+          } else {
+            return Center(
+              child: Text('No hay datos disponibles'),
+            );
+          }
+        },
+      ),
     );
   }
 }

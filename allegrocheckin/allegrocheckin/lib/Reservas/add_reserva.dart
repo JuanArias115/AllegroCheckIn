@@ -1,4 +1,6 @@
+import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
+import 'package:allegrocheckin/models/estadias.dart';
 import 'package:flutter/material.dart';
 
 class AddReserve extends StatefulWidget {
@@ -9,28 +11,27 @@ class AddReserve extends StatefulWidget {
 class _AddReserveState extends State<AddReserve> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _nombre = '';
-  String _domo = 'Domo 1';
+  String _domo = 'Refugio Del Arbol';
   DateTime _checkIn = DateTime.now();
   int _abono = 0;
 
   List<String> _domos = [
-    'Domo 1',
-    'Domo 2',
-    'Domo 3',
+    'Refugio Del Arbol',
+    'Arrullo Del Río',
   ];
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  Future<void> _submitForm() async {
+    Estadia estadia = Estadia(
+        id: "0",
+        nombre: _nombre,
+        domo: _domo,
+        fecha: DateTime.now().toString(),
+        abono: _abono.toString(),
+        estado: "ACTIVO");
 
-      // Realizar acciones con los datos enviados
+    var res = await ReserveService().addReserva(estadia);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Formulario enviado'),
-        ),
-      );
-    }
+    Navigator.of(context).pop(res);
   }
 
   @override
