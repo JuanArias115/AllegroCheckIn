@@ -1,4 +1,5 @@
 import 'package:allegrocheckin/Reservas/main_reservas.dart';
+import 'package:allegrocheckin/catalog_products/catalog_products.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = [
     ReservationList(),
-    Widget2(),
+    ProductListPage(),
     Widget3(),
   ];
 
@@ -36,8 +37,8 @@ class _MainPageState extends State<MainPage> {
             label: 'Reservas ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Widget 2',
+            icon: Icon(Icons.food_bank),
+            label: 'Productos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

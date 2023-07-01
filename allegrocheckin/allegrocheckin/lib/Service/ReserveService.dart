@@ -24,7 +24,7 @@ class ReserveService {
     return result;
   }
 
-  // ADD
+  // CREATE
 
   Future<CommandResult> addProductsEstadia(ProductoEstadia product) {
     final result =
@@ -37,6 +37,11 @@ class ReserveService {
     return result;
   }
 
+  Future<CommandResult> addProducts(Producto product) {
+    final result = RestService().httpPost("addItemCatalogo", product.toJson());
+    return result;
+  }
+
   //DELETE
 
   Future<CommandResult> deleteProductsEstadias(id) async {
@@ -46,6 +51,20 @@ class ReserveService {
 
   Future<CommandResult> deleteEstadias(id) async {
     final result = await RestService().httpGet("deleteEstadia?id=$id");
+    return result;
+  }
+
+  Future<CommandResult> deleteProduct(id) async {
+    final result = await RestService().httpGet("deleteItemCatalogo?id=$id");
+    return result;
+  }
+
+  //UPDATE
+
+  Future<CommandResult> updateProductsEstadia(
+      ProductoEstadia productoEstadia) async {
+    final result = await RestService()
+        .httpPost("editDetalleEstadia", productoEstadia.toJson());
     return result;
   }
 }

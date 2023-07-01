@@ -6,6 +6,7 @@ import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/products.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_share/flutter_share.dart';
 
 class ProductList extends StatefulWidget {
   final String id;
@@ -74,7 +75,18 @@ class _ProductListState extends State<ProductList> {
                     backgroundColor:
                         MaterialStateProperty.all<Color>(Colors.red),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    var mensaje = ganerarMensaje();
+                    try {
+                      await FlutterShare.share(
+                        title: 'Compartir en WhatsApp',
+                        text: mensaje,
+                        chooserTitle: 'Compartir mensaje',
+                      );
+                    } catch (e) {
+                      print('Error al compartir en WhatsApp: $e');
+                    }
+                  },
                   child: Text("Finalizar Reserva"),
                 ),
               ),
@@ -115,10 +127,12 @@ class _ProductListState extends State<ProductList> {
                         subtitle: TextFormField(
                           controller: controller,
                           keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            // Actualizar el valor del producto
+                          onChanged: (value) async {
                             _products[index].valor =
-                                double.parse(value).toStringAsFixed(0);
+                                (double.tryParse(value) ?? 0)
+                                    .toStringAsFixed(0);
+                            await ReserveService()
+                                .updateProductsEstadia(product);
                             _calculateTotal();
                           },
                         ),
@@ -141,5 +155,17 @@ class _ProductListState extends State<ProductList> {
         ),
       ),
     );
+  }
+
+  ganerarMensaje() {
+    var mensaje = "Resumen de cuenta: \n";
+    "\n";
+    mensaje += "Allegro eco Glamping \n";
+    for (var product in _products) {
+      mensaje += product.item + " - " + product.valor + "\n";
+    }
+    "\n";
+    mensaje += "Total: " + _total.toStringAsFixed(0);
+    return mensaje;
   }
 }
