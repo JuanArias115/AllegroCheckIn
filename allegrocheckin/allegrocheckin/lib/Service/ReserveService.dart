@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:allegrocheckin/Service/RestService.dart';
 import 'package:allegrocheckin/models/ProductsEstadia.dart';
+import 'package:allegrocheckin/models/categorias.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/estadias.dart';
 import 'package:allegrocheckin/models/products.dart';
+import 'package:flutter/foundation.dart';
 
 class ReserveService {
   // GET
@@ -21,6 +23,11 @@ class ReserveService {
 
   Future<CommandResult> getproducts() async {
     final result = await RestService().httpGet("getCatalogo");
+    return result;
+  }
+
+  Future<CommandResult> getCategorias() async {
+    final result = await RestService().httpGet("getCategorias");
     return result;
   }
 
@@ -42,6 +49,11 @@ class ReserveService {
     return result;
   }
 
+  Future<CommandResult> addCategorias(Categoria category) {
+    final result = RestService().httpPost("addCategorias", category.toJson());
+    return result;
+  }
+
   //DELETE
 
   Future<CommandResult> deleteProductsEstadias(id) async {
@@ -59,12 +71,31 @@ class ReserveService {
     return result;
   }
 
+  Future<CommandResult> deleteCategorias(id) async {
+    final result = await RestService().httpGet("deleteCategorias?id=$id");
+    return result;
+  }
+
   //UPDATE
 
   Future<CommandResult> updateProductsEstadia(
       ProductoEstadia productoEstadia) async {
     final result = await RestService()
         .httpPost("editDetalleEstadia", productoEstadia.toJson());
+    return result;
+  }
+
+  //Reports
+
+  Future<CommandResult> getReport(mes) async {
+    final result = await RestService().httpGet("getReport?mes=$mes");
+    return result;
+  }
+
+  // CheckOut
+  Future<CommandResult> checkOut(Estadia estadia) async {
+    final result =
+        await RestService().httpPost("checkOutEstadia", estadia.toJson());
     return result;
   }
 }

@@ -3,14 +3,16 @@ import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
 import 'package:allegrocheckin/models/ProductsEstadia.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
+import 'package:allegrocheckin/models/estadias.dart';
 import 'package:allegrocheckin/models/products.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:intl/intl.dart';
 
 class ProductList extends StatefulWidget {
-  final String id;
-  ProductList({required this.id});
+  final Estadia estadia;
+  ProductList({required this.estadia});
   @override
   _ProductListState createState() => _ProductListState();
 }
@@ -18,6 +20,7 @@ class ProductList extends StatefulWidget {
 class _ProductListState extends State<ProductList> {
   List<ProductoEstadia> _products = [];
   double _total = 0.0;
+  final oCcy = NumberFormat("#,##0", "en_US");
 
   @override
   void initState() {
@@ -28,7 +31,7 @@ class _ProductListState extends State<ProductList> {
   Future<void> _fetchProductList() async {
     try {
       CommandResult result =
-          await ReserveService().getproductsEstadias(widget.id);
+          await ReserveService().getproductsEstadias(widget.estadia.id);
       List<ProductoEstadia> products =
           ProductoEstadia.parseMyDataList(result.data);
       setState(() {
@@ -59,6 +62,12 @@ class _ProductListState extends State<ProductList> {
     }
   }
 
+  void _updateProductValue(ProductoEstadia product, String newValue) async {
+    product.valor = newValue;
+    await ReserveService().updateProductsEstadia(product);
+    _fetchProductList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -68,35 +77,45 @@ class _ProductListState extends State<ProductList> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: 230,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.red),
-                  ),
-                  onPressed: () async {
-                    var mensaje = ganerarMensaje();
-                    try {
-                      await FlutterShare.share(
-                        title: 'Compartir en WhatsApp',
-                        text: mensaje,
-                        chooserTitle: 'Compartir mensaje',
-                      );
-                    } catch (e) {
-                      print('Error al compartir en WhatsApp: $e');
-                    }
-                  },
-                  child: Text("Finalizar Reserva"),
-                ),
-              ),
+              widget.estadia.estado == "ACTIVO"
+                  ? SizedBox(
+                      width: 230,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.red),
+                        ),
+                        onPressed: () async {
+                          var mensaje = ganerarMensaje();
+                          var res = await FlutterShare.share(
+                            title: 'Compartir en WhatsApp',
+                            text: mensaje,
+                            chooserTitle: 'Compartir mensaje',
+                          );
+
+                          if (res!) {
+                            Estadia estadiaTemp = widget.estadia;
+                            estadiaTemp.estado = "INACTIVO";
+                            var res =
+                                await ReserveService().checkOut(estadiaTemp);
+                            setState(() {
+                              _fetchProductList();
+                            });
+                          }
+
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text("Check Out"),
+                      ),
+                    )
+                  : SizedBox.shrink(),
               FloatingActionButton(
                 onPressed: () async {
                   var r = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          ProductListaAdd(idEstadia: widget.id),
+                          ProductListaAdd(idEstadia: widget.estadia.id),
                     ),
                   );
                   _fetchProductList();
@@ -107,7 +126,7 @@ class _ProductListState extends State<ProductList> {
           ),
         ),
         appBar: AppBar(
-          title: Text('Total: \$ ${_total.toStringAsFixed(0)}'),
+          title: Text('Total: \$ ${oCcy.format(_total)}'),
         ),
         body: Container(
           child: _products.isNotEmpty
@@ -124,27 +143,33 @@ class _ProductListState extends State<ProductList> {
                       child: ListTile(
                         leading: Icon(Icons.shopping_cart),
                         title: Text(product.item),
-                        subtitle: TextFormField(
-                          controller: controller,
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) async {
-                            _products[index].valor =
-                                (double.tryParse(value) ?? 0)
-                                    .toStringAsFixed(0);
-                            await ReserveService()
-                                .updateProductsEstadia(product);
-                            _calculateTotal();
-                          },
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                          onPressed: () {
-                            _deleteProduct(product.id);
-                          },
-                        ),
+                        subtitle:
+                            Text(oCcy.format(double.parse(product.valor))),
+                        trailing: widget.estadia.estado == "ACTIVO"
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: Colors.blue,
+                                    ),
+                                    onPressed: () {
+                                      _showEditDialog(product);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () {
+                                      _deleteProduct(product.id);
+                                    },
+                                  ),
+                                ],
+                              )
+                            : SizedBox.shrink(),
                       ),
                     );
                   },
@@ -157,15 +182,52 @@ class _ProductListState extends State<ProductList> {
     );
   }
 
-  ganerarMensaje() {
+  void _showEditDialog(ProductoEstadia product) async {
+    TextEditingController controller =
+        TextEditingController(text: product.valor.toString());
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Editar Valor'),
+          content: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                String newValue = controller.text;
+                _updateProductValue(product, newValue);
+                Navigator.pop(context);
+              },
+              child: Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+    setState(() {
+      _fetchProductList();
+    });
+  }
+
+  String ganerarMensaje() {
     var mensaje = "Resumen de cuenta: \n";
     "\n";
     mensaje += "Allegro eco Glamping \n";
     for (var product in _products) {
-      mensaje += product.item + " - " + product.valor + "\n";
+      mensaje += product.item +
+          " - " +
+          oCcy.format(double.parse(product.valor)) +
+          "\n";
     }
     "\n";
-    mensaje += "Total: " + _total.toStringAsFixed(0);
+    mensaje += "Abono - ${oCcy.format(double.parse(widget.estadia.abono))} \n";
+
+    mensaje +=
+        "Total: " + oCcy.format(_total - double.parse(widget.estadia.abono));
     return mensaje;
   }
 }

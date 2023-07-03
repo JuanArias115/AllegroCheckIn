@@ -1,3 +1,6 @@
+import 'package:allegrocheckin/Configuration/configuration_main_page.dart';
+import 'package:allegrocheckin/Reports/chart_page.dart';
+import 'package:allegrocheckin/Reports/main_report_page.dart';
 import 'package:allegrocheckin/Reservas/main_reservas.dart';
 import 'package:allegrocheckin/catalog_products/catalog_products.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
@@ -10,11 +13,12 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
-
+  Color colorTheme = Colors.blue;
   final List<Widget> _pages = [
     ReservationList(),
     ProductListPage(),
-    Widget3(),
+    SalesReportPage(),
+    ConfiguracionesPage()
   ];
 
   void _onTabTapped(int index) {
@@ -29,11 +33,15 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBarComponents(),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.grey,
+        fixedColor: colorTheme,
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.bed),
+            icon: Icon(
+              Icons.bed,
+            ),
             label: 'Reservas ',
           ),
           BottomNavigationBarItem(
@@ -41,29 +49,15 @@ class _MainPageState extends State<MainPage> {
             label: 'Productos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Widget 3',
+            icon: Icon(Icons.bar_chart),
+            label: 'Reportes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Configuración',
           ),
         ],
       ),
-    );
-  }
-}
-
-class Widget2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Proximamenta'),
-    );
-  }
-}
-
-class Widget3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Proximamenta'),
     );
   }
 }

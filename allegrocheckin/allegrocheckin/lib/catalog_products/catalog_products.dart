@@ -1,6 +1,8 @@
 import 'package:allegrocheckin/Service/ReserveService.dart';
+import 'package:allegrocheckin/models/categorias.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/products.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,12 +13,33 @@ class ProductListPage extends StatefulWidget {
 
 class _ProductListPageState extends State<ProductListPage> {
   TextEditingController nameController = TextEditingController();
-  TextEditingController categoryController = TextEditingController();
   TextEditingController valueController = TextEditingController();
+
+  List<Categoria> categoryOptions =
+      []; // Actualizar para usar el servicio async
+
+  String selectedCategory = "";
 
   @override
   void initState() {
     super.initState();
+    loadCategoryOptions(); // Cargar las opciones de categoría al iniciar la página
+  }
+
+  Future<void> loadCategoryOptions() async {
+    // Llamar al servicio async para obtener las opciones de categoría
+    try {
+      CommandResult result = await ReserveService().getCategorias();
+      setState(() {
+        selectedCategory = result.data[0][
+            'nombre']; // Establecer la primera opción como la opción seleccionada
+        categoryOptions = Categoria.parseMyDataList(
+            result.data); // Actualizar las opciones de categoría en el estado
+      });
+    } catch (error) {
+      print('Error al cargar las opciones de categoría: $error');
+      // Manejar el error de carga de opciones de categoría
+    }
   }
 
   @override
@@ -37,7 +60,26 @@ class _ProductListPageState extends State<ProductListPage> {
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(productList[index].item),
-                  subtitle: Text('Value: \$${productList[index].valor}'),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('Value: \$${productList[index].valor}'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('Categoría: ${productList[index].categoria}'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
@@ -61,7 +103,7 @@ class _ProductListPageState extends State<ProductListPage> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('Add Product'),
+                title: Text('Añadir Producto'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -69,9 +111,20 @@ class _ProductListPageState extends State<ProductListPage> {
                       controller: nameController,
                       decoration: InputDecoration(labelText: 'Name'),
                     ),
-                    TextField(
-                      controller: categoryController,
+                    DropdownButtonFormField(
+                      value: selectedCategory,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategory = value.toString();
+                        });
+                      },
                       decoration: InputDecoration(labelText: 'Category'),
+                      items: categoryOptions.map((option) {
+                        return DropdownMenuItem<String>(
+                          value: option.nombre,
+                          child: Text(option.nombre),
+                        );
+                      }).toList(),
                     ),
                     TextField(
                       controller: valueController,
@@ -99,12 +152,11 @@ class _ProductListPageState extends State<ProductListPage> {
                       Producto product = Producto(
                         id: "0",
                         item: nameController.text,
-                        categoria: categoryController.text,
+                        categoria: selectedCategory,
                         valor: valueController.text,
                       );
                       await ReserveService().addProducts(product);
                       nameController.clear();
-                      categoryController.clear();
                       valueController.clear();
                       Navigator.of(context).pop();
                     },

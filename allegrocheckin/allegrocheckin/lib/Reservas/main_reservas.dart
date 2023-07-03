@@ -61,22 +61,31 @@ class _ReservationListState extends State<ReservationList> {
                   margin: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      var r = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ProductList(
-                                  id: reservation.id,
+                                  estadia: reservation,
                                 )),
                       );
+                      if (r ?? false) {
+                        setState(() {
+                          var i = 1;
+                        });
+                      }
                     },
                     child: ListTile(
+                        tileColor: reservation.estado == "ACTIVO"
+                            ? Color.fromARGB(255, 178, 248, 182)
+                            : Color.fromARGB(255, 249, 200, 200),
                         leading: const Icon(Icons.bed),
                         title: Text(reservation.nombre),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Fecha: ${reservation.fecha.toString()}'),
+                            Text(
+                                'Fecha: ${reservation.fecha.toString().substring(0, 10)}'),
                             Text('Domo: ${reservation.domo}'),
                           ],
                         ),
