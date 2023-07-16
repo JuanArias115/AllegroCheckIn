@@ -140,13 +140,13 @@ class _ProductListPageState extends State<ProductListPage> {
                   ],
                 ),
                 actions: [
-                  FlatButton(
+                  ElevatedButton(
                     child: Text('Cancel'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
-                  FlatButton(
+                  ElevatedButton(
                     child: Text('Add'),
                     onPressed: () async {
                       Producto product = Producto(

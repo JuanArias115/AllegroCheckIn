@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "340122060106",
+    "project_id": "allegrocheckin",
+    "storage_bucket": "allegrocheckin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340122060106:android:61507bd0f7d742d7816db3",
+        "android_client_info": {
+          "package_name": "com.example.allegrocheckin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "340122060106-8n44esvpuphl85mam0p8fhuc4iqbfdcc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.allegrocheckin",
+            "certificate_hash": "2b411bf6b66ebe1973b55df755ecd9b7da259ad2"
+          }
+        },
+        {
+          "client_id": "340122060106-prs0gd92f1uvv38qv65pbakg8makiau4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbMe2I4_EZDuA9ojovEv1tY749DnF2bK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340122060106-prs0gd92f1uvv38qv65pbakg8makiau4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
