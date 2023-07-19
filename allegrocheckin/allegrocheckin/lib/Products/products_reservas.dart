@@ -5,6 +5,7 @@ import 'package:allegrocheckin/models/ProductsEstadia.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/estadias.dart';
 import 'package:allegrocheckin/models/products.dart';
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -163,8 +164,18 @@ class _ProductListState extends State<ProductList> {
                                       Icons.delete,
                                       color: Colors.red,
                                     ),
-                                    onPressed: () {
-                                      _deleteProduct(product.id);
+                                    onPressed: () async {
+                                      if (await confirm(
+                                        context,
+                                        title: const Text('Eliminar'),
+                                        content: const Text(
+                                            'Estas seguro que deseas continuar?'),
+                                        textOK: const Text('Si'),
+                                        textCancel: const Text('No'),
+                                      )) {
+                                        _deleteProduct(product.id);
+                                      }
+                                      return print('pressedCancel');
                                     },
                                   ),
                                 ],
@@ -216,6 +227,8 @@ class _ProductListState extends State<ProductList> {
   String ganerarMensaje() {
     var mensaje = "Resumen de cuenta: \n";
     "\n";
+    mensaje += "Nombre: ${widget.estadia.nombre.toString()}\n";
+    mensaje += "Fecha: ${widget.estadia.fecha.toString().substring(0, 10)}\n";
     mensaje += "Allegro eco Glamping \n";
     for (var product in _products) {
       mensaje += product.item +

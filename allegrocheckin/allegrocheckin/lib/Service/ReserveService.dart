@@ -16,6 +16,11 @@ class ReserveService {
     return result;
   }
 
+  Future<CommandResult> getHistory() async {
+    final result = await RestService().httpGet("/getHistory");
+    return result;
+  }
+
   Future<CommandResult> getproductsEstadias(id) async {
     final result = await RestService().httpGet("getDetalleEstadia?id=$id");
     return result;

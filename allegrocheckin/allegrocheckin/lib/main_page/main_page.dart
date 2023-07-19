@@ -1,6 +1,7 @@
 import 'package:allegrocheckin/Configuration/configuration_main_page.dart';
 import 'package:allegrocheckin/Reports/chart_page.dart';
 import 'package:allegrocheckin/Reports/main_report_page.dart';
+import 'package:allegrocheckin/Reservas/history_page.dart';
 import 'package:allegrocheckin/Reservas/main_reservas.dart';
 import 'package:allegrocheckin/catalog_products/catalog_products.dart';
 import 'package:allegrocheckin/components/AppBarComponent.dart';
@@ -42,6 +43,7 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBarComponents(),
       body: [
         ReservationList(),
+        HistoryPage(),
         ProductListPage(),
         SalesReportPage(),
         UserPage(
@@ -63,6 +65,12 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.bed,
+            ),
+            label: 'Reservas ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.history,
             ),
             label: 'Reservas ',
           ),

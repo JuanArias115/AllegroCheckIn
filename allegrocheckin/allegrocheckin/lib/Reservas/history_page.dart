@@ -3,23 +3,17 @@ import 'package:allegrocheckin/Reservas/add_reserva.dart';
 import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/estadias.dart';
-import 'package:flutter/material.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
+import 'package:flutter/material.dart';
 
-class Reservation {
-  final String name;
-  final String date;
-  final String domo;
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
-  Reservation({required this.name, required this.date, required this.domo});
-}
-
-class ReservationList extends StatefulWidget {
   @override
-  _ReservationListState createState() => _ReservationListState();
+  _HistoryPageState createState() => _HistoryPageState();
 }
 
-class _ReservationListState extends State<ReservationList> {
+class _HistoryPageState extends State<HistoryPage> {
   @override
   void initState() {
     super.initState();
@@ -41,7 +35,7 @@ class _ReservationListState extends State<ReservationList> {
         child: const Icon(Icons.add),
       ),
       body: FutureBuilder<CommandResult>(
-        future: ReserveService().getEstadias(),
+        future: ReserveService().getHistory(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -77,39 +71,40 @@ class _ReservationListState extends State<ReservationList> {
                       }
                     },
                     child: ListTile(
-                        tileColor: reservation.estado == "ACTIVO"
-                            ? Color.fromARGB(255, 178, 248, 182)
-                            : Color.fromARGB(255, 249, 200, 200),
-                        leading: const Icon(Icons.bed),
-                        title: Text(reservation.nombre),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                'Fecha: ${reservation.fecha.toString().substring(0, 10)}'),
-                            Text('Domo: ${reservation.domo}'),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            if (await confirm(
-                              context,
-                              title: const Text('Eliminar'),
-                              content: const Text(
-                                  'Estas seguro que deseas continuar?'),
-                              textOK: const Text('Si'),
-                              textCancel: const Text('No'),
-                            )) {
-                              var res = await ReserveService()
-                                  .deleteEstadias(reservation.id);
-                              setState(() {
-                                var i = 1;
-                              });
-                            }
-                            return print('pressedCancel');
-                          },
-                        )),
+                      tileColor: reservation.estado == "ACTIVO"
+                          ? Color.fromARGB(255, 178, 248, 182)
+                          : Color.fromARGB(255, 230, 234, 240),
+                      leading: const Icon(Icons.bed),
+                      title: Text(reservation.nombre),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Fecha: ${reservation.fecha.toString().substring(0, 10)}'),
+                          Text('Domo: ${reservation.domo}'),
+                        ],
+                      ),
+                      //  IconButton(
+                      //   icon: Icon(Icons.delete, color: Colors.red),
+                      //   onPressed: () async {
+                      //     if (await confirm(
+                      //       context,
+                      //       title: const Text('Eliminar'),
+                      //       content: const Text(
+                      //           'Estas seguro que deseas continuar?'),
+                      //       textOK: const Text('Si'),
+                      //       textCancel: const Text('No'),
+                      //     )) {
+                      //       var res = await ReserveService()
+                      //           .deleteEstadias(reservation.id);
+                      //       setState(() {
+                      //         var i = 1;
+                      //       });
+                      //     }
+                      //     return print('pressedCancel');
+                      //   },
+                      // )
+                    ),
                   ),
                 );
                 ;
