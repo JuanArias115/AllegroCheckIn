@@ -1,3 +1,4 @@
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/models/categorias.dart';
@@ -56,8 +57,18 @@ class _CategoriasCrudPageState extends State<CategoriasCrudPage> {
                     title: Text(categoria.nombre),
                     trailing: IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _eliminarCategoria(context, categoria);
+                      onPressed: () async {
+                        if (await confirm(context,
+                            title: const Text("Allegro Glamping"),
+                            content: const Text(
+                                "¿Está seguro que desea eliminar la categoría?"))) {
+                          _eliminarCategoria(context, categoria);
+
+                          setState(() {
+                            var i = 1;
+                          });
+                        }
+                        return;
                       },
                     ),
                   );

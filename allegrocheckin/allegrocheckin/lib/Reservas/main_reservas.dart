@@ -3,6 +3,7 @@ import 'package:allegrocheckin/Reservas/add_reserva.dart';
 import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/estadias.dart';
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 
 class Reservation {
@@ -13,7 +14,10 @@ class Reservation {
   Reservation({required this.name, required this.date, required this.domo});
 }
 
+List<Estadia> EstadiasResult = [];
+
 class ReservationList extends StatefulWidget {
+  const ReservationList({super.key});
   @override
   _ReservationListState createState() => _ReservationListState();
 }
@@ -39,8 +43,8 @@ class _ReservationListState extends State<ReservationList> {
         },
         child: const Icon(Icons.add),
       ),
-      body: FutureBuilder<CommandResult>(
-        future: ReserveService().getEstadias(),
+      body: FutureBuilder<List<Estadia>>(
+        future: fetchEstadias(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -50,9 +54,8 @@ class _ReservationListState extends State<ReservationList> {
             return const Center(
               child: Text('Error al cargar los datos'),
             );
-          } else if (snapshot.hasData) {
-            List<Estadia> reservations =
-                Estadia.parseMyDataList(snapshot.data!.data);
+          } else if (snapshot.data!.isNotEmpty) {
+            List<Estadia> reservations = snapshot.data ?? [];
             return ListView.builder(
               itemCount: reservations.length,
               itemBuilder: (context, index) {
@@ -84,33 +87,46 @@ class _ReservationListState extends State<ReservationList> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text('Id: ${reservation.id}'),
                             Text(
                                 'Fecha: ${reservation.fecha.toString().substring(0, 10)}'),
                             Text('Domo: ${reservation.domo}'),
                           ],
                         ),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
-                            var res = await ReserveService()
-                                .deleteEstadias(reservation.id);
-                            setState(() {
-                              var i = 1;
-                            });
+                            if (await confirm(context,
+                                title: const Text("Allegro Glamping"),
+                                content: const Text(
+                                    "¿Está seguro que desea eliminar la reserva?"))) {
+                              await ReserveService()
+                                  .deleteEstadias(reservation.id);
+                              setState(() {
+                                var i = 1;
+                              });
+                            }
+                            return;
                           },
                         )),
                   ),
                 );
-                ;
               },
             );
           } else {
             return const Center(
-              child: Text('No hay datos disponibles'),
+              child: Text('No hay reservas activas'),
             );
           }
         },
       ),
     );
   }
+}
+
+Future<List<Estadia>> fetchEstadias() async {
+  CommandResult result = await ReserveService().getEstadias();
+  var data = result.data;
+  var estadias = Estadia.parseMyDataList(data);
+  return estadias;
 }

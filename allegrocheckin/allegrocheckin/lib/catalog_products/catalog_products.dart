@@ -2,6 +2,7 @@ import 'package:allegrocheckin/Service/ReserveService.dart';
 import 'package:allegrocheckin/models/categorias.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/products.dart';
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,11 +84,17 @@ class _ProductListPageState extends State<ProductListPage> {
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
-                      await ReserveService()
-                          .deleteProduct(productList[index].id);
-                      setState(() {
-                        var i = 1;
-                      });
+                      if (await confirm(context,
+                          title: const Text("Allegro Glamping"),
+                          content: const Text(
+                              "¿Está seguro que desea eliminar el producto?"))) {
+                        await ReserveService()
+                            .deleteProduct(productList[index].id);
+                        setState(() {
+                          var i = 1;
+                        });
+                      }
+                      return;
                     },
                   ),
                 );
@@ -140,13 +147,13 @@ class _ProductListPageState extends State<ProductListPage> {
                   ],
                 ),
                 actions: [
-                  FlatButton(
+                  ElevatedButton(
                     child: Text('Cancel'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
-                  FlatButton(
+                  ElevatedButton(
                     child: Text('Add'),
                     onPressed: () async {
                       Producto product = Producto(

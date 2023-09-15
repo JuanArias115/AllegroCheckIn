@@ -5,6 +5,7 @@ import 'package:allegrocheckin/models/ProductsEstadia.dart';
 import 'package:allegrocheckin/models/commandresult_model.dart';
 import 'package:allegrocheckin/models/estadias.dart';
 import 'package:allegrocheckin/models/products.dart';
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -163,8 +164,18 @@ class _ProductListState extends State<ProductList> {
                                       Icons.delete,
                                       color: Colors.red,
                                     ),
-                                    onPressed: () {
-                                      _deleteProduct(product.id);
+                                    onPressed: () async {
+                                      if (await confirm(context,
+                                          title: const Text("Allegro Glamping"),
+                                          content: const Text(
+                                              "¿Está seguro que desea eliminar el prodúcto?"))) {
+                                        _deleteProduct(product.id);
+
+                                        setState(() {
+                                          var i = 1;
+                                        });
+                                      }
+                                      return;
                                     },
                                   ),
                                 ],
